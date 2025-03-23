@@ -1,65 +1,29 @@
-from flask import Flask, request, render_template
-import hashlib
+# app.py
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-@app.route("/", methods=["GET", "POST"])
+def shifty_cipher(text, shift):
+    encrypted_text = ""
+    for char in text:
+        if char.isalpha():
+            shift_amount = shift % 26
+            if char.islower():
+                encrypted_text += chr((ord(char) - ord('a') + shift_amount) % 26 + ord('a'))
+            else:
+                encrypted_text += chr((ord(char) - ord('A') + shift_amount) % 26 + ord('A'))
+        else:
+            encrypted_text += char
+    return encrypted_text
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    hash_result = ""
-    if request.method == "POST":
-        text = request.form.get("text", "")
-        algorithm = request.form.get("algorithm", "md5")
-        
-        if algorithm == "md5":
-            hash_result = hashlib.md5(text.encode()).hexdigest()
+    encrypted_text = ""
+    if request.method == 'POST':
+        text = request.form['text']
+        shift = int(request.form['shift'])
+        encrypted_text = shifty_cipher(text, shift)
+    return render_template('index.html', encrypted_text=encrypted_text)
 
-        elif algorithm == "sha256":
-            hash_result = hashlib.sha256(text.encode()).hexdigest()
-
-        elif algorithm == "sha1":
-            hash_result = hashlib.sha1(text.encode()).hexdigest()
-
-        
-
-        elif algorithm == "sha384":
-            hash_result = hashlib.sha384(text.encode()).hexdigest()
-
-        elif algorithm == "sha512":
-            hash_result = hashlib.sha512(text.encode()).hexdigest()
-
-      
-
-        elif algorithm == "sha3_512":
-            hash_result = hashlib.sha3_512(text.encode()).hexdigest()
-
-        elif algorithm == "blake2s":
-            hash_result = hashlib.blake2s(text.encode()).hexdigest()
-
-        elif algorithm == "sha224":
-            hash_result = hashlib.sha224(text.encode()).hexdigest()
-
-       
-
-        elif algorithm == "shake_128":
-            hash_result = hashlib.shake_128(text.encode()).hexdigest()
-
-        elif algorithm == "sha3_256":
-            hash_result = hashlib.sha3_256(text.encode()).hexdigest()
-
-        elif algorithm == "blake2b":
-            hash_result = hashlib.blake2b(text.encode()).hexdigest()
-
-        elif algorithm == "sha3_384":
-            hash_result = hashlib.sha3_384(text.encode()).hexdigest()
-
-        elif algorithm == "sha3_224":
-            hash_result = hashlib.sha3_224(text.encode()).hexdigest()
-
- 
-
-      
-
-    return render_template("index.html", hash_result=hash_result)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
